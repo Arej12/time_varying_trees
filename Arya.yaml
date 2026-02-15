@@ -1,0 +1,71 @@
+output_dir: outputs
+data_type: trees
+n_samples: 20
+n_jobs: -1
+seed: 42
+
+context:
+  t1:
+    type: uniform
+    low: 4
+    high: 8
+  la1:
+    type: uniform
+    low: 0.01
+    high: 1.0
+  la2:
+    type: uniform
+    low: 0.01
+    high: 1.0
+  mu_over_la1:
+    type: uniform
+    low: 0.0
+    high: 0.9
+  mu_over_la2:
+    type: uniform
+    low: 0.0
+    high: 0.9
+  max_time:
+    type: uniform
+    low: t1 + 2.0
+    high: 12
+
+parameterization: canonical
+states: [A]
+init_state: A
+
+birth_rates:
+  value: [la1, la2]
+  change_times: [t1]
+
+death_rates:
+  value: [mu_over_la1 * la1, mu_over_la2 * la2]   
+  change_times: [t1]
+
+max_time: max_time
+
+timed_events:
+  - type: sampling
+    times: [max_time]
+    state: A
+    proportion: 1.0
+    removal: True
+
+acceptance_criterion: |
+  (
+    100 <= tree.n_leaves <= 1000
+    and sum(1 for node, time in tree.times.items() if time < t1) >= 20   
+    and (
+      np.abs(la1 / la2 - 1.0) > 0.1
+      or np.abs(mu_over_la1 / mu_over_la2 - 1.0) > 0.1
+    )
+  )
+
+logs:
+  num_old_lineages: sum(1 for node, time in tree.times.items() if time < t1)
+  total_leaves: tree.n_leaves
+  tree_height: max_time
+  ratio_la: la1 / la2
+  ratio_mu: mu_over_la1 / mu_over_la2
+
+timeout: 2
