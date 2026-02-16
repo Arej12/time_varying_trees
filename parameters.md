@@ -1,4 +1,4 @@
-### Time-varying parameters Parameters:
+### Time-varying Parameters:
 
 - Lambda1 (birth rate1): U(0.01, 1.0)
 - Mu/Lambda ratio: U(0.0, 0.9)
